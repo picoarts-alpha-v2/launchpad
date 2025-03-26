@@ -9,9 +9,27 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useMidiStore } from "@/stores/useMidiStore";
 import { PlusCircle, X } from "lucide-react";
+import { useEffect } from "react";
 
 export function DeviceConnection() {
+	const {
+		devices,
+		selectedInput,
+		selectedPlaybackOutputs,
+		selectedVisualOutput,
+		initialize,
+		setSelectedInput,
+		addPlaybackOutput,
+		removePlaybackOutput,
+		setSelectedVisualOutput,
+	} = useMidiStore();
+
+	useEffect(() => {
+		initialize();
+	}, [initialize]);
+
 	return (
 		<Card className="p-6">
 			<div className="flex items-center justify-between mb-6">
@@ -21,78 +39,81 @@ export function DeviceConnection() {
 				</span>
 			</div>
 
-			<div className="grid gap-6">
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
 						<label htmlFor="input-device" className="text-sm font-medium">
 							入力デバイス
 						</label>
-						<span className="text-xs text-muted-foreground">未接続</span>
+						<span className="text-xs text-muted-foreground">
+							{selectedInput ? "接続済み" : "未接続"}
+						</span>
 					</div>
-					<Select>
+					<Select
+						value={selectedInput || ""}
+						onValueChange={(value) => setSelectedInput(value || null)}
+					>
 						<SelectTrigger id="input-device" className="w-full">
 							<SelectValue placeholder="Launchpad MK2を選択" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="launchpad">Launchpad MK2</SelectItem>
-							<SelectItem value="other">その他のデバイス</SelectItem>
+							{devices
+								.filter((device) => device.type === "input")
+								.map((device) => (
+									<SelectItem key={device.id} value={device.id}>
+										{device.name}
+									</SelectItem>
+								))}
 						</SelectContent>
 					</Select>
 				</div>
 
-				<div className="space-y-4">
+				<div className="space-y-2">
 					<div className="flex items-center justify-between">
 						{/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
 						<label className="text-sm font-medium">出力デバイス（再生）</label>
-						<Button variant="outline" size="sm">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => addPlaybackOutput("")}
+						>
 							<PlusCircle className="h-4 w-4 mr-2" />
-							デバイスを追加
+							追加
 						</Button>
 					</div>
-
-					<div className="space-y-3">
-						<div className="relative">
-							<Select>
+					{selectedPlaybackOutputs.map((outputId, index) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						<div key={index} className="relative">
+							<Select
+								value={outputId}
+								onValueChange={(value) => {
+									removePlaybackOutput(outputId);
+									addPlaybackOutput(value);
+								}}
+							>
 								<SelectTrigger className="w-full pr-12">
-									<SelectValue placeholder="再生用出力デバイスを選択" />
+									<SelectValue placeholder="出力デバイスを選択" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="audio-interface">
-										オーディオインターフェース
-									</SelectItem>
-									<SelectItem value="other">その他のデバイス</SelectItem>
+									{devices
+										.filter((device) => device.type === "output")
+										.map((device) => (
+											<SelectItem key={device.id} value={device.id}>
+												{device.name}
+											</SelectItem>
+										))}
 								</SelectContent>
 							</Select>
 							<Button
 								variant="ghost"
 								size="sm"
-								className="absolute right-0 top-0 h-full px-3 hover:bg-destructive hover:text-destructive-foreground"
+								className="absolute right-0 top-0 h-full"
+								onClick={() => removePlaybackOutput(outputId)}
 							>
 								<X className="h-4 w-4" />
 							</Button>
 						</div>
-
-						<div className="relative">
-							<Select>
-								<SelectTrigger className="w-full pr-12">
-									<SelectValue placeholder="再生用出力デバイスを選択" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="audio-interface">
-										オーディオインターフェース
-									</SelectItem>
-									<SelectItem value="other">その他のデバイス</SelectItem>
-								</SelectContent>
-							</Select>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="absolute right-0 top-0 h-full px-3 hover:bg-destructive hover:text-destructive-foreground"
-							>
-								<X className="h-4 w-4" />
-							</Button>
-						</div>
-					</div>
+					))}
 				</div>
 
 				<div className="space-y-2">
@@ -100,15 +121,25 @@ export function DeviceConnection() {
 						<label htmlFor="visual-output" className="text-sm font-medium">
 							出力デバイス（映像）
 						</label>
-						<span className="text-xs text-muted-foreground">未接続</span>
+						<span className="text-xs text-muted-foreground">
+							{selectedVisualOutput ? "接続済み" : "未接続"}
+						</span>
 					</div>
-					<Select>
+					<Select
+						value={selectedVisualOutput || ""}
+						onValueChange={(value) => setSelectedVisualOutput(value || null)}
+					>
 						<SelectTrigger id="visual-output" className="w-full">
 							<SelectValue placeholder="映像用出力デバイスを選択" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="launchpad">Launchpad MK2</SelectItem>
-							<SelectItem value="other">その他のデバイス</SelectItem>
+							{devices
+								.filter((device) => device.type === "output")
+								.map((device) => (
+									<SelectItem key={device.id} value={device.id}>
+										{device.name}
+									</SelectItem>
+								))}
 						</SelectContent>
 					</Select>
 				</div>
