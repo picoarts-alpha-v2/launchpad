@@ -15,6 +15,7 @@ interface LaunchpadState {
 		setting: Partial<ButtonSetting>,
 	) => void;
 	resetButtonSettings: () => void;
+	getButtonSetting: (row: number, col: number) => ButtonSetting;
 }
 
 // 9x9のグリッドの初期状態を作成
@@ -33,7 +34,7 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 		);
 };
 
-export const useLaunchpadStore = create<LaunchpadState>()((set) => ({
+export const useLaunchpadStore = create<LaunchpadState>()((set, get) => ({
 	buttonSettings: createInitialButtonSettings(),
 	updateButtonSetting: (
 		row: number,
@@ -51,4 +52,6 @@ export const useLaunchpadStore = create<LaunchpadState>()((set) => ({
 
 	resetButtonSettings: () =>
 		set({ buttonSettings: createInitialButtonSettings() }),
+	getButtonSetting: (row: number, col: number) =>
+		get().buttonSettings[row][col],
 }));
