@@ -180,7 +180,11 @@ function handleMidiMessage(event: WebMidi.MIDIMessageEvent, state: MIDIState) {
 		);
 		if (visualOutput) {
 			const midiOutput = visualOutput.port as WebMidi.MIDIOutput;
-			midiOutput.send([status, note, velocity]);
+			midiOutput.send([
+				status,
+				note,
+				velocity === 0 ? 0 : Math.floor(Math.random() * 127),
+			]);
 		}
 	}
 }
