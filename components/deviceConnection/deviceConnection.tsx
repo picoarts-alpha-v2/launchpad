@@ -16,10 +16,10 @@ import { useEffect } from "react";
 export function DeviceConnection() {
 	const {
 		devices,
-		selectedInput,
-		selectedPlaybackOutputs,
-		selectedVisualOutput,
-		initialize,
+		selectedInputDeviceId,
+		selectedPlaybackOutputDeviceIdList,
+		selectedVisualOutputDeviceId,
+		deviceInitialize: initialize,
 		setSelectedInput,
 		addPlaybackOutput,
 		removePlaybackOutput,
@@ -46,11 +46,11 @@ export function DeviceConnection() {
 							入力デバイス
 						</label>
 						<span className="text-xs text-muted-foreground">
-							{selectedInput ? "接続済み" : "未接続"}
+							{selectedInputDeviceId ? "接続済み" : "未接続"}
 						</span>
 					</div>
 					<Select
-						value={selectedInput || ""}
+						value={selectedInputDeviceId || ""}
 						onValueChange={(value) => setSelectedInput(value || null)}
 					>
 						<SelectTrigger id="input-device" className="w-full">
@@ -81,7 +81,7 @@ export function DeviceConnection() {
 							追加
 						</Button>
 					</div>
-					{selectedPlaybackOutputs.map((outputId, index) => (
+					{selectedPlaybackOutputDeviceIdList.map((outputId, index) => (
 						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 						<div key={index} className="relative">
 							<Select
@@ -122,11 +122,11 @@ export function DeviceConnection() {
 							出力デバイス（映像）
 						</label>
 						<span className="text-xs text-muted-foreground">
-							{selectedVisualOutput ? "接続済み" : "未接続"}
+							{selectedVisualOutputDeviceId ? "接続済み" : "未接続"}
 						</span>
 					</div>
 					<Select
-						value={selectedVisualOutput || ""}
+						value={selectedVisualOutputDeviceId || ""}
 						onValueChange={(value) => setSelectedVisualOutput(value || null)}
 					>
 						<SelectTrigger id="visual-output" className="w-full">

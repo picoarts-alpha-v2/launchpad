@@ -11,12 +11,12 @@ export interface MIDIDevice {
 interface MIDIState {
 	midiAccess: WebMidi.MIDIAccess | null;
 	devices: MIDIDevice[];
-	selectedInput: string | null;
-	selectedPlaybackOutputs: string[];
-	selectedVisualOutput: string | null;
+	selectedInputDeviceId: string | null;
+	selectedPlaybackOutputDeviceIdList: string[];
+	selectedVisualOutputDeviceId: string | null;
 
 	// アクション
-	initialize: () => Promise<void>;
+	deviceInitialize: () => Promise<void>;
 	setSelectedInput: (id: string | null) => void;
 	addPlaybackOutput: (id: string) => void;
 	removePlaybackOutput: (id: string) => void;
@@ -26,11 +26,11 @@ interface MIDIState {
 export const useMidiStore = create<MIDIState>((set, get) => ({
 	midiAccess: null,
 	devices: [],
-	selectedInput: null,
-	selectedPlaybackOutputs: [],
-	selectedVisualOutput: null,
+	selectedInputDeviceId: null,
+	selectedPlaybackOutputDeviceIdList: [],
+	selectedVisualOutputDeviceId: null,
 
-	initialize: async () => {
+	deviceInitialize: async () => {
 		try {
 			const midiAccess = await navigator.requestMIDIAccess();
 			const devices: MIDIDevice[] = [];
@@ -82,15 +82,18 @@ export const useMidiStore = create<MIDIState>((set, get) => ({
 				} else {
 					set((state) => ({
 						devices: state.devices.filter((d) => d.id !== port.id),
-						selectedInput:
-							state.selectedInput === port.id ? null : state.selectedInput,
-						selectedPlaybackOutputs: state.selectedPlaybackOutputs.filter(
-							(id) => id !== port.id,
-						),
-						selectedVisualOutput:
-							state.selectedVisualOutput === port.id
+						selectedInputDeviceId:
+							state.selectedInputDeviceId === port.id
 								? null
-								: state.selectedVisualOutput,
+								: state.selectedInputDeviceId,
+						selectedPlaybackOutputDeviceIdList:
+							state.selectedPlaybackOutputDeviceIdList.filter(
+								(id) => id !== port.id,
+							),
+						selectedVisualOutputDeviceId:
+							state.selectedVisualOutputDeviceId === port.id
+								? null
+								: state.selectedVisualOutputDeviceId,
 					}));
 					toast.error("MIDIデバイスが切断されました", {
 						description: port.name || "Unknown Device",
@@ -108,7 +111,7 @@ export const useMidiStore = create<MIDIState>((set, get) => ({
 	setSelectedInput: (id: string | null) => {
 		const { devices } = get();
 		const currentInput = devices.find(
-			(d) => d.type === "input" && d.id === get().selectedInput,
+			(d) => d.type === "input" && d.id === get().selectedInputDeviceId,
 		);
 		const newInput = devices.find((d) => d.type === "input" && d.id === id);
 
@@ -126,35 +129,40 @@ export const useMidiStore = create<MIDIState>((set, get) => ({
 			};
 		}
 
-		set({ selectedInput: id });
+		set({ selectedInputDeviceId: id });
 	},
 
 	addPlaybackOutput: (id: string) => {
 		set((state) => ({
-			selectedPlaybackOutputs: [...state.selectedPlaybackOutputs, id],
+			selectedPlaybackOutputDeviceIdList: [
+				...state.selectedPlaybackOutputDeviceIdList,
+				id,
+			],
 		}));
 	},
 
 	removePlaybackOutput: (id: string) => {
 		set((state) => ({
-			selectedPlaybackOutputs: state.selectedPlaybackOutputs.filter(
-				(outputId) => outputId !== id,
-			),
+			selectedPlaybackOutputDeviceIdList:
+				state.selectedPlaybackOutputDeviceIdList.filter(
+					(outputId) => outputId !== id,
+				),
 		}));
 	},
 
 	setSelectedVisualOutput: (id: string | null) => {
-		set({ selectedVisualOutput: id });
+		set({ selectedVisualOutputDeviceId: id });
 	},
 }));
 
-// MIDI メッセージの処理
+// Midiメッセージを受信したとき実行される
 function handleMidiMessage(event: WebMidi.MIDIMessageEvent, state: MIDIState) {
 	const [status, note, velocity] = event.data;
 
 	// 再生用出力デバイスにメッセージを送信
+	// ToDo:あとで設定できるようにする
 	// biome-ignore lint/complexity/noForEach: <explanation>
-	state.selectedPlaybackOutputs.forEach((outputId) => {
+	state.selectedPlaybackOutputDeviceIdList.forEach((outputId) => {
 		const output = state.devices.find(
 			(d) => d.type === "output" && d.id === outputId,
 		);
@@ -165,9 +173,10 @@ function handleMidiMessage(event: WebMidi.MIDIMessageEvent, state: MIDIState) {
 	});
 
 	// 映像用出力デバイスにメッセージを送信
-	if (state.selectedVisualOutput) {
+	// ToDo:あとで設定できるようにする
+	if (state.selectedVisualOutputDeviceId) {
 		const visualOutput = state.devices.find(
-			(d) => d.type === "output" && d.id === state.selectedVisualOutput,
+			(d) => d.type === "output" && d.id === state.selectedVisualOutputDeviceId,
 		);
 		if (visualOutput) {
 			const midiOutput = visualOutput.port as WebMidi.MIDIOutput;
