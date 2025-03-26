@@ -1,0 +1,134 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface LaunchpadButtonSettingsProps {
+	isOpen: boolean;
+	onClose: () => void;
+	x: number;
+	y: number;
+}
+
+export function LaunchpadButtonSettings({
+	isOpen,
+	onClose,
+	x,
+	y,
+}: LaunchpadButtonSettingsProps) {
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<div className="flex items-center gap-2">
+						<DialogTitle>パッド設定</DialogTitle>
+						<Badge variant="outline">
+							{x}, {y}
+						</Badge>
+					</div>
+				</DialogHeader>
+
+				<Tabs defaultValue="basic" className="w-full">
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="basic">基本設定</TabsTrigger>
+						<TabsTrigger value="advanced">詳細設定</TabsTrigger>
+					</TabsList>
+
+					<TabsContent value="basic" className="space-y-4">
+						<div className="space-y-4 pt-4">
+							<div className="grid gap-2">
+								<Label htmlFor="effect-type">エフェクトタイプ</Label>
+								<Select defaultValue="dot">
+									<SelectTrigger id="effect-type">
+										<SelectValue placeholder="エフェクトを選択" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="dot">ドット</SelectItem>
+										<SelectItem value="explosion">爆発</SelectItem>
+										<SelectItem value="vertical">縦</SelectItem>
+										<SelectItem value="horizontal">横</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="grid gap-2">
+								<Label>カラー</Label>
+								<div className="grid grid-cols-2 gap-2">
+									<div className="space-y-2">
+										<Label
+											htmlFor="color"
+											className="text-xs text-muted-foreground"
+										>
+											カスタムカラー
+										</Label>
+										<Input
+											type="color"
+											id="color"
+											defaultValue="#ff0000"
+											className="w-full h-10 p-1"
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</TabsContent>
+
+					<TabsContent value="advanced" className="space-y-4">
+						<div className="space-y-4 pt-4">
+							<div className="grid gap-2">
+								<Label htmlFor="midi-note">MIDI ノート</Label>
+								<div className="flex gap-2 items-center">
+									<Input
+										type="number"
+										id="midi-note"
+										min="0"
+										max="127"
+										defaultValue="60"
+										className="w-24"
+									/>
+									<span className="text-sm text-muted-foreground">(0-127)</span>
+								</div>
+							</div>
+
+							<div className="grid gap-2">
+								<Label htmlFor="output-device">出力デバイス</Label>
+								<Select>
+									<SelectTrigger id="output-device">
+										<SelectValue placeholder="出力デバイスを選択" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="device1">デバイス1</SelectItem>
+										<SelectItem value="device2">デバイス2</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
+					</TabsContent>
+				</Tabs>
+
+				<div className="flex justify-end gap-2 mt-4">
+					<Button variant="outline" onClick={onClose}>
+						キャンセル
+					</Button>
+					<Button>保存</Button>
+				</div>
+			</DialogContent>
+		</Dialog>
+	);
+}

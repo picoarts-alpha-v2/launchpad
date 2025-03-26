@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
 	Select,
@@ -8,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { PlusCircle, X } from "lucide-react";
 
 export function DeviceConnection() {
 	return (
@@ -19,7 +21,7 @@ export function DeviceConnection() {
 				</span>
 			</div>
 
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div className="grid gap-6">
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
 						<label htmlFor="input-device" className="text-sm font-medium">
@@ -38,24 +40,59 @@ export function DeviceConnection() {
 					</Select>
 				</div>
 
-				<div className="space-y-2">
+				<div className="space-y-4">
 					<div className="flex items-center justify-between">
-						<label htmlFor="playback-output" className="text-sm font-medium">
-							出力デバイス（再生）
-						</label>
-						<span className="text-xs text-muted-foreground">未接続</span>
+						{/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+						<label className="text-sm font-medium">出力デバイス（再生）</label>
+						<Button variant="outline" size="sm">
+							<PlusCircle className="h-4 w-4 mr-2" />
+							デバイスを追加
+						</Button>
 					</div>
-					<Select>
-						<SelectTrigger id="playback-output" className="w-full">
-							<SelectValue placeholder="再生用出力デバイスを選択" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="audio-interface">
-								オーディオインターフェース
-							</SelectItem>
-							<SelectItem value="other">その他のデバイス</SelectItem>
-						</SelectContent>
-					</Select>
+
+					<div className="space-y-3">
+						<div className="relative">
+							<Select>
+								<SelectTrigger className="w-full pr-12">
+									<SelectValue placeholder="再生用出力デバイスを選択" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="audio-interface">
+										オーディオインターフェース
+									</SelectItem>
+									<SelectItem value="other">その他のデバイス</SelectItem>
+								</SelectContent>
+							</Select>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="absolute right-0 top-0 h-full px-3 hover:bg-destructive hover:text-destructive-foreground"
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
+
+						<div className="relative">
+							<Select>
+								<SelectTrigger className="w-full pr-12">
+									<SelectValue placeholder="再生用出力デバイスを選択" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="audio-interface">
+										オーディオインターフェース
+									</SelectItem>
+									<SelectItem value="other">その他のデバイス</SelectItem>
+								</SelectContent>
+							</Select>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="absolute right-0 top-0 h-full px-3 hover:bg-destructive hover:text-destructive-foreground"
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
+					</div>
 				</div>
 
 				<div className="space-y-2">
