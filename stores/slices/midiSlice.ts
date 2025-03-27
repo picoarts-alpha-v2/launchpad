@@ -1,8 +1,8 @@
-import { midiToXY } from "@/utils/utils";
+import { midiToXY, sleep, xyToMidi } from "@/utils/utils";
 import { toast } from "sonner";
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
-import type { MIDIDevice } from "../types";
+import type { ButtonSetting, MIDIDevice } from "../types";
 
 export interface MIDISlice {
 	midiAccess: WebMidi.MIDIAccess | null;
@@ -122,7 +122,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 		if (newInput) {
 			const midiInput = newInput.port as WebMidi.MIDIInput;
 			midiInput.onmidimessage = async (event) => {
-				const [status, note, velocity] = event.data;
+				const [inputStatus, inputNote, inputVelocity] = event.data;
 				// 再生用出力デバイスにメッセージを送信
 				// ToDo:あとで設定できるようにする
 				// biome-ignore lint/complexity/noForEach: <explanation>
@@ -132,29 +132,26 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 					);
 					if (output) {
 						const midiOutput = output.port as WebMidi.MIDIOutput;
-						midiOutput.send([status, note, velocity]);
+						midiOutput.send([inputStatus, inputNote, inputVelocity]);
 					}
 				});
 
 				// 映像用出力デバイスにメッセージを送信
 				// ToDo:あとで設定できるようにする
 				if (get().selectedVisualOutputDeviceId) {
-					const visualOutput = get().devices.find(
+					const visualOutputDevice = get().devices.find(
 						(d) =>
 							d.type === "output" &&
 							d.id === get().selectedVisualOutputDeviceId,
 					);
-					if (visualOutput) {
-						let sendVelocity = 127;
-						if (velocity === 0) {
-							sendVelocity = 0;
-						} else {
-							const xy = midiToXY(note);
-							sendVelocity = get().buttonSettings[xy.y][xy.x].color;
-						}
-
-						const midiOutput = visualOutput.port as WebMidi.MIDIOutput;
-						midiOutput.send([status, note, sendVelocity]);
+					if (visualOutputDevice) {
+						const xy = midiToXY(inputNote);
+						sendMidiMessage(
+							event,
+							visualOutputDevice,
+							get().buttonSettings[xy.y][xy.x],
+							xy,
+						);
 					}
 				}
 			};
@@ -185,3 +182,124 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 		set({ selectedVisualOutputDeviceId: id });
 	},
 });
+
+const sendMidiMessage = async (
+	event: WebMidi.MIDIMessageEvent,
+	device: MIDIDevice,
+	buttonSetting: ButtonSetting,
+	xy: { x: number; y: number },
+) => {
+	const midiOutput = device.port as WebMidi.MIDIOutput;
+	const [inputStatus, inputNote, inputVelocity] = event.data;
+
+	// 消灯
+	if (inputVelocity === 0) {
+		if (buttonSetting.effectType === "dot") {
+			midiOutput.send([inputStatus, inputNote, 0]);
+			return;
+		}
+
+		if (buttonSetting.effectType === "horizontal") {
+			for (let i = 1; i < 10; i++) {
+				const midi = xyToMidi(i, xy.y);
+				midiOutput.send([inputStatus, midi, 0]);
+			}
+			return;
+		}
+
+		if (buttonSetting.effectType === "vertical") {
+			for (let i = 1; i < 10; i++) {
+				const midi = xyToMidi(xy.x, i);
+				midiOutput.send([inputStatus, midi, 0]);
+			}
+			return;
+		}
+		if (buttonSetting.effectType === "explosion") {
+			return;
+		}
+	}
+
+	if (buttonSetting.effectType === "dot") {
+		// 点灯
+		const midi = xyToMidi(xy.x, xy.y);
+		midiOutput.send([inputStatus, midi, buttonSetting.color]);
+		return;
+	}
+
+	if (buttonSetting.effectType === "horizontal") {
+		// 横一列に点灯
+		for (let i = 1; i < 10; i++) {
+			const midi = xyToMidi(i, xy.y);
+			midiOutput.send([inputStatus, midi, buttonSetting.color]);
+		}
+		return;
+	}
+
+	if (buttonSetting.effectType === "vertical") {
+		// 縦一列に点灯
+		for (let i = 1; i < 10; i++) {
+			const midi = xyToMidi(xy.x, i);
+			midiOutput.send([inputStatus, midi, buttonSetting.color]);
+		}
+		return;
+	}
+	if (buttonSetting.effectType === "explosion") {
+		// ドットと1集周りが光る
+		for (let i = -1; i <= 1; i++) {
+			for (let j = -1; j <= 1; j++) {
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			}
+		}
+		await sleep(50);
+
+		// ドットと一周が消える
+		for (let i = -1; i <= 1; i++) {
+			for (let j = -1; j <= 1; j++) {
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, 0]);
+			}
+		}
+
+		// ドットのさらに周りが光る
+		for (let i = -2; i <= 2; i++) {
+			for (let j = -2; j <= 2; j++) {
+				if (2 > Math.abs(i) && 2 > Math.abs(j)) {
+					continue;
+				}
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			}
+		}
+
+		await sleep(50);
+		// ドットのさらに周りが消える
+		for (let i = -2; i <= 2; i++) {
+			for (let j = -2; j <= 2; j++) {
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, 0]);
+			}
+		}
+
+		// ドットのさらにさらに周りが光る
+		for (let i = -3; i <= 3; i++) {
+			for (let j = -3; j <= 3; j++) {
+				if (3 > Math.abs(i) && 3 > Math.abs(j)) {
+					continue;
+				}
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			}
+		}
+
+		await sleep(50);
+		// ドットのさらに周りが消える
+		for (let i = -3; i <= 3; i++) {
+			for (let j = -3; j <= 3; j++) {
+				const midi = xyToMidi(xy.x + i, xy.y + j);
+				midiOutput.send([inputStatus, midi, 0]);
+			}
+		}
+		return;
+	}
+};
