@@ -1,21 +1,17 @@
 "use client";
 
+import type { Coordinate } from "@/stores/types";
 import { useState } from "react";
 import { LaunchpadButtonSettings } from "./LaunchpadButtonSettings";
 
-export type LaunchpadButtonProps = {
-	x: number;
-	y: number;
-};
-
-export function LaunchpadButton({ x, y }: LaunchpadButtonProps) {
+export function LaunchpadButton({ x, y }: Coordinate) {
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
 	let className = "rounded-sm";
-	if (y === 9 || x === 9) {
+	if (y === 8 || x === 8) {
 		className = "rounded-full";
 	}
-	if (y === 9 && x === 9) {
+	if (y === 8 && x === 8) {
 		className = "invisible";
 	}
 

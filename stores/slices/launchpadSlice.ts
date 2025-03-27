@@ -14,13 +14,13 @@ export interface LaunchpadSlice {
 }
 
 const createInitialButtonSettings = (): ButtonSetting[][] => {
-	return Array(10)
+	return Array(8)
 		.fill(null)
 		.map(() =>
-			Array(10)
+			Array(8)
 				.fill(null)
 				.map(() => ({
-					effectType: "explosion",
+					effectType: "horizontal",
 					color: 127,
 					midiNote: 60,
 					outputDeviceId: null,

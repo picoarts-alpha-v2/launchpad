@@ -36,30 +36,27 @@ export function LaunchpadButtonSettings({
 	y,
 }: LaunchpadButtonSettingsProps) {
 	const { buttonSettings, updateButtonSetting } = useStore();
-	const currentSetting = buttonSettings[y][x];
+	const currentSetting = buttonSettings?.[y]?.[x];
 
-	const handleSave = () => {
-		updateButtonSetting(y, x, {
-			effectType: selectedEffect,
-			color: Number.parseInt(selectedColor),
-			midiNote: Number.parseInt(selectedMidiNote),
-			outputDeviceId: selectedDevice,
-		});
-		onClose();
+	const handleEffectChange = (value: ButtonSetting["effectType"]) => {
+		updateButtonSetting(y, x, { effectType: value });
 	};
 
-	const [selectedEffect, setSelectedEffect] = useState<
-		ButtonSetting["effectType"]
-	>(currentSetting.effectType);
-	const [selectedColor, setSelectedColor] = useState(
-		currentSetting.color.toString(),
-	);
-	const [selectedMidiNote, setSelectedMidiNote] = useState(
-		currentSetting.midiNote.toString(),
-	);
-	const [selectedDevice, setSelectedDevice] = useState<string | null>(
-		currentSetting.outputDeviceId,
-	);
+	const handleColorChange = (value: string) => {
+		updateButtonSetting(y, x, { color: Number.parseInt(value) });
+	};
+
+	const handleMidiNoteChange = (value: string) => {
+		updateButtonSetting(y, x, { midiNote: Number.parseInt(value) });
+	};
+
+	const handleDeviceChange = (value: string) => {
+		updateButtonSetting(y, x, { outputDeviceId: value });
+	};
+
+	if (!currentSetting) {
+		return <></>;
+	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -84,10 +81,8 @@ export function LaunchpadButtonSettings({
 							<div className="grid gap-2">
 								<Label htmlFor="effect-type">エフェクトタイプ</Label>
 								<Select
-									value={selectedEffect}
-									onValueChange={(value: ButtonSetting["effectType"]) =>
-										setSelectedEffect(value)
-									}
+									value={currentSetting.effectType}
+									onValueChange={handleEffectChange}
 								>
 									<SelectTrigger id="effect-type">
 										<SelectValue placeholder="エフェクトを選択" />
@@ -110,8 +105,8 @@ export function LaunchpadButtonSettings({
 											id="color"
 											min="0"
 											max="127"
-											value={selectedColor}
-											onChange={(e) => setSelectedColor(e.target.value)}
+											value={currentSetting.color}
+											onChange={(e) => handleColorChange(e.target.value)}
 											className="w-24"
 										/>
 										<span className="text-sm text-muted-foreground">
@@ -133,8 +128,8 @@ export function LaunchpadButtonSettings({
 										id="midi-note"
 										min="0"
 										max="127"
-										value={selectedMidiNote}
-										onChange={(e) => setSelectedMidiNote(e.target.value)}
+										value={currentSetting.midiNote}
+										onChange={(e) => handleMidiNoteChange(e.target.value)}
 										className="w-24"
 									/>
 									<span className="text-sm text-muted-foreground">(0-127)</span>
@@ -144,8 +139,8 @@ export function LaunchpadButtonSettings({
 							<div className="grid gap-2">
 								<Label htmlFor="output-device">出力デバイス</Label>
 								<Select
-									value={selectedDevice || ""}
-									onValueChange={setSelectedDevice}
+									value={currentSetting.outputDeviceId || ""}
+									onValueChange={handleDeviceChange}
 								>
 									<SelectTrigger id="output-device">
 										<SelectValue placeholder="出力デバイスを選択" />
@@ -162,9 +157,8 @@ export function LaunchpadButtonSettings({
 
 				<div className="flex justify-end gap-2 mt-4">
 					<Button variant="outline" onClick={onClose}>
-						キャンセル
+						閉じる
 					</Button>
-					<Button onClick={handleSave}>保存</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

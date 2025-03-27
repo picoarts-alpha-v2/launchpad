@@ -1,11 +1,12 @@
+import type { Coordinate } from "@/stores/types";
 import React from "react";
-import { LaunchpadButton, type LaunchpadButtonProps } from "./LaunchpadButton";
+import { LaunchpadButton } from "./LaunchpadButton";
 
 export function Launchpad() {
-	const launchpadButtonPropsListList: LaunchpadButtonProps[][] = [];
-	for (let y = 1; y <= 9; y++) {
-		const launchpadButtonPropsList: LaunchpadButtonProps[] = [];
-		for (let x = 1; x <= 9; x++) {
+	const launchpadButtonPropsListList: Coordinate[][] = [];
+	for (let y = 0; y <= 8; y++) {
+		const launchpadButtonPropsList: Coordinate[] = [];
+		for (let x = 0; x <= 8; x++) {
 			launchpadButtonPropsList.push({
 				x: x,
 				y: y,

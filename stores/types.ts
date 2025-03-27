@@ -11,3 +11,8 @@ export type ButtonSetting = {
 	midiNote: number;
 	outputDeviceId: string | null;
 };
+
+export type Coordinate = {
+	x: number;
+	y: number;
+};

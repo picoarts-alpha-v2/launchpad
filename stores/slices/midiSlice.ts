@@ -1,4 +1,4 @@
-import { midiToXY, sleep, xyToMidi } from "@/utils/utils";
+import { coordinateToMidi, midiToCoordinate, sleep } from "@/utils/utils";
 import { toast } from "sonner";
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
@@ -145,7 +145,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 							d.id === get().selectedVisualOutputDeviceId,
 					);
 					if (visualOutputDevice) {
-						const xy = midiToXY(inputNote);
+						const xy = midiToCoordinate(inputNote);
 						sendMidiMessage(
 							event,
 							visualOutputDevice,
@@ -200,16 +200,16 @@ const sendMidiMessage = async (
 		}
 
 		if (buttonSetting.effectType === "horizontal") {
-			for (let i = 1; i < 10; i++) {
-				const midi = xyToMidi(i, xy.y);
+			for (let i = 0; i < 7; i++) {
+				const midi = coordinateToMidi(i, xy.y);
 				midiOutput.send([inputStatus, midi, 0]);
 			}
 			return;
 		}
 
 		if (buttonSetting.effectType === "vertical") {
-			for (let i = 1; i < 10; i++) {
-				const midi = xyToMidi(xy.x, i);
+			for (let i = 0; i < 7; i++) {
+				const midi = coordinateToMidi(xy.x, i);
 				midiOutput.send([inputStatus, midi, 0]);
 			}
 			return;
@@ -221,15 +221,15 @@ const sendMidiMessage = async (
 
 	if (buttonSetting.effectType === "dot") {
 		// 点灯
-		const midi = xyToMidi(xy.x, xy.y);
+		const midi = coordinateToMidi(xy.x, xy.y);
 		midiOutput.send([inputStatus, midi, buttonSetting.color]);
 		return;
 	}
 
 	if (buttonSetting.effectType === "horizontal") {
 		// 横一列に点灯
-		for (let i = 1; i < 10; i++) {
-			const midi = xyToMidi(i, xy.y);
+		for (let i = 0; i < 7; i++) {
+			const midi = coordinateToMidi(i, xy.y);
 			midiOutput.send([inputStatus, midi, buttonSetting.color]);
 		}
 		return;
@@ -237,8 +237,8 @@ const sendMidiMessage = async (
 
 	if (buttonSetting.effectType === "vertical") {
 		// 縦一列に点灯
-		for (let i = 1; i < 10; i++) {
-			const midi = xyToMidi(xy.x, i);
+		for (let i = 0; i < 7; i++) {
+			const midi = coordinateToMidi(xy.x, i);
 			midiOutput.send([inputStatus, midi, buttonSetting.color]);
 		}
 		return;
@@ -247,7 +247,7 @@ const sendMidiMessage = async (
 		// ドットと1集周りが光る
 		for (let i = -1; i <= 1; i++) {
 			for (let j = -1; j <= 1; j++) {
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, buttonSetting.color]);
 			}
 		}
@@ -256,7 +256,7 @@ const sendMidiMessage = async (
 		// ドットと一周が消える
 		for (let i = -1; i <= 1; i++) {
 			for (let j = -1; j <= 1; j++) {
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, 0]);
 			}
 		}
@@ -267,7 +267,7 @@ const sendMidiMessage = async (
 				if (2 > Math.abs(i) && 2 > Math.abs(j)) {
 					continue;
 				}
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, buttonSetting.color]);
 			}
 		}
@@ -276,7 +276,7 @@ const sendMidiMessage = async (
 		// ドットのさらに周りが消える
 		for (let i = -2; i <= 2; i++) {
 			for (let j = -2; j <= 2; j++) {
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, 0]);
 			}
 		}
@@ -287,7 +287,7 @@ const sendMidiMessage = async (
 				if (3 > Math.abs(i) && 3 > Math.abs(j)) {
 					continue;
 				}
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, buttonSetting.color]);
 			}
 		}
@@ -296,7 +296,7 @@ const sendMidiMessage = async (
 		// ドットのさらに周りが消える
 		for (let i = -3; i <= 3; i++) {
 			for (let j = -3; j <= 3; j++) {
-				const midi = xyToMidi(xy.x + i, xy.y + j);
+				const midi = coordinateToMidi(xy.x + i, xy.y + j);
 				midiOutput.send([inputStatus, midi, 0]);
 			}
 		}
