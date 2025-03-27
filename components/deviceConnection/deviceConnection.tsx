@@ -9,7 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useMidiStore } from "@/stores/useMidiStore";
+import { useStore } from "@/stores/store";
 import { PlusCircle, X } from "lucide-react";
 import { useEffect } from "react";
 
@@ -24,7 +24,7 @@ export function DeviceConnection() {
 		addPlaybackOutput,
 		removePlaybackOutput,
 		setSelectedVisualOutput,
-	} = useMidiStore();
+	} = useStore();
 
 	useEffect(() => {
 		initialize();

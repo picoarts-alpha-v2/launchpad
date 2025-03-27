@@ -18,10 +18,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	type ButtonSetting,
-	useLaunchpadStore,
-} from "@/stores/useLaunchpadStore";
+import { useStore } from "@/stores/store";
+import type { ButtonSetting } from "@/stores/types";
 import { useState } from "react";
 
 interface LaunchpadButtonSettingsProps {
@@ -37,7 +35,7 @@ export function LaunchpadButtonSettings({
 	x,
 	y,
 }: LaunchpadButtonSettingsProps) {
-	const { buttonSettings, updateButtonSetting } = useLaunchpadStore();
+	const { buttonSettings, updateButtonSetting } = useStore();
 	const currentSetting = buttonSettings[y][x];
 
 	const handleSave = () => {

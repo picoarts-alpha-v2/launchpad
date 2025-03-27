@@ -1,13 +1,8 @@
-import { create } from "zustand";
+import type { StateCreator } from "zustand";
+import type { RootState } from "../store";
+import type { ButtonSetting } from "../types";
 
-export type ButtonSetting = {
-	effectType: "dot" | "explosion" | "vertical" | "horizontal";
-	color: number;
-	midiNote: number;
-	outputDeviceId: string | null;
-};
-
-interface LaunchpadState {
+export interface LaunchpadSlice {
 	buttonSettings: ButtonSetting[][];
 	updateButtonSetting: (
 		row: number,
@@ -18,7 +13,6 @@ interface LaunchpadState {
 	getButtonSetting: (row: number, col: number) => ButtonSetting;
 }
 
-// 9x9のグリッドの初期状態を作成
 const createInitialButtonSettings = (): ButtonSetting[][] => {
 	return Array(10)
 		.fill(null)
@@ -34,8 +28,14 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 		);
 };
 
-export const useLaunchpadStore = create<LaunchpadState>()((set, get) => ({
+export const createLaunchpadSlice: StateCreator<
+	RootState,
+	[],
+	[],
+	LaunchpadSlice
+> = (set, get) => ({
 	buttonSettings: createInitialButtonSettings(),
+
 	updateButtonSetting: (
 		row: number,
 		col: number,
@@ -52,6 +52,7 @@ export const useLaunchpadStore = create<LaunchpadState>()((set, get) => ({
 
 	resetButtonSettings: () =>
 		set({ buttonSettings: createInitialButtonSettings() }),
+
 	getButtonSetting: (row: number, col: number) =>
 		get().buttonSettings[row][col],
-}));
+});

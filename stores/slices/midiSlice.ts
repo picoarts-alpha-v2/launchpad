@@ -1,21 +1,15 @@
+import { midiToXY } from "@/utils/utils";
 import { toast } from "sonner";
-import { create } from "zustand";
+import type { StateCreator } from "zustand";
+import type { RootState } from "../store";
+import type { MIDIDevice } from "../types";
 
-export interface MIDIDevice {
-	id: string;
-	name: string;
-	type: "input" | "output";
-	port: WebMidi.MIDIPort;
-}
-
-interface MIDIState {
+export interface MIDISlice {
 	midiAccess: WebMidi.MIDIAccess | null;
 	devices: MIDIDevice[];
 	selectedInputDeviceId: string | null;
 	selectedPlaybackOutputDeviceIdList: string[];
 	selectedVisualOutputDeviceId: string | null;
-
-	// アクション
 	deviceInitialize: () => Promise<void>;
 	setSelectedInput: (id: string | null) => void;
 	addPlaybackOutput: (id: string) => void;
@@ -23,7 +17,10 @@ interface MIDIState {
 	setSelectedVisualOutput: (id: string | null) => void;
 }
 
-export const useMidiStore = create<MIDIState>((set, get) => ({
+export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
+	set,
+	get,
+) => ({
 	midiAccess: null,
 	devices: [],
 	selectedInputDeviceId: null,
@@ -124,8 +121,42 @@ export const useMidiStore = create<MIDIState>((set, get) => ({
 		// 新しいイベントリスナーを設定
 		if (newInput) {
 			const midiInput = newInput.port as WebMidi.MIDIInput;
-			midiInput.onmidimessage = (event) => {
-				handleMidiMessage(event, get());
+			midiInput.onmidimessage = async (event) => {
+				const [status, note, velocity] = event.data;
+				// 再生用出力デバイスにメッセージを送信
+				// ToDo:あとで設定できるようにする
+				// biome-ignore lint/complexity/noForEach: <explanation>
+				get().selectedPlaybackOutputDeviceIdList.forEach((outputId) => {
+					const output = get().devices.find(
+						(d) => d.type === "output" && d.id === outputId,
+					);
+					if (output) {
+						const midiOutput = output.port as WebMidi.MIDIOutput;
+						midiOutput.send([status, note, velocity]);
+					}
+				});
+
+				// 映像用出力デバイスにメッセージを送信
+				// ToDo:あとで設定できるようにする
+				if (get().selectedVisualOutputDeviceId) {
+					const visualOutput = get().devices.find(
+						(d) =>
+							d.type === "output" &&
+							d.id === get().selectedVisualOutputDeviceId,
+					);
+					if (visualOutput) {
+						let sendVelocity = 127;
+						if (velocity === 0) {
+							sendVelocity = 0;
+						} else {
+							const xy = midiToXY(note);
+							sendVelocity = get().buttonSettings[xy.y][xy.x].color;
+						}
+
+						const midiOutput = visualOutput.port as WebMidi.MIDIOutput;
+						midiOutput.send([status, note, sendVelocity]);
+					}
+				}
 			};
 		}
 
@@ -153,38 +184,4 @@ export const useMidiStore = create<MIDIState>((set, get) => ({
 	setSelectedVisualOutput: (id: string | null) => {
 		set({ selectedVisualOutputDeviceId: id });
 	},
-}));
-
-// Midiメッセージを受信したとき実行される
-function handleMidiMessage(event: WebMidi.MIDIMessageEvent, state: MIDIState) {
-	const [status, note, velocity] = event.data;
-
-	// 再生用出力デバイスにメッセージを送信
-	// ToDo:あとで設定できるようにする
-	// biome-ignore lint/complexity/noForEach: <explanation>
-	state.selectedPlaybackOutputDeviceIdList.forEach((outputId) => {
-		const output = state.devices.find(
-			(d) => d.type === "output" && d.id === outputId,
-		);
-		if (output) {
-			const midiOutput = output.port as WebMidi.MIDIOutput;
-			midiOutput.send([status, note, velocity]);
-		}
-	});
-
-	// 映像用出力デバイスにメッセージを送信
-	// ToDo:あとで設定できるようにする
-	if (state.selectedVisualOutputDeviceId) {
-		const visualOutput = state.devices.find(
-			(d) => d.type === "output" && d.id === state.selectedVisualOutputDeviceId,
-		);
-		if (visualOutput) {
-			const midiOutput = visualOutput.port as WebMidi.MIDIOutput;
-			midiOutput.send([
-				status,
-				note,
-				velocity === 0 ? 0 : Math.floor(Math.random() * 127),
-			]);
-		}
-	}
-}
+});
