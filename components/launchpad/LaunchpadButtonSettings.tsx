@@ -17,7 +17,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/stores/store";
 import type { ButtonSetting, Color } from "@/stores/types";
 
@@ -54,7 +53,7 @@ export function LaunchpadButtonSettings({
 	};
 
 	if (!currentSetting) {
-		return <></>;
+		return null;
 	}
 
 	return (
@@ -69,102 +68,87 @@ export function LaunchpadButtonSettings({
 					</div>
 				</DialogHeader>
 
-				<Tabs defaultValue="basic" className="w-full">
-					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="basic">基本設定</TabsTrigger>
-						<TabsTrigger value="advanced">詳細設定</TabsTrigger>
-					</TabsList>
+				<div className="space-y-6 py-4">
+					{/* エフェクト設定 */}
+					<div className="grid gap-2">
+						<Label htmlFor="effect-type">エフェクトタイプ</Label>
+						<Select
+							value={currentSetting.effectType}
+							onValueChange={handleEffectChange}
+						>
+							<SelectTrigger id="effect-type">
+								<SelectValue placeholder="エフェクトを選択" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="dot">ドット</SelectItem>
+								<SelectItem value="explosion">爆発</SelectItem>
+								<SelectItem value="vertical">縦</SelectItem>
+								<SelectItem value="horizontal">横</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 
-					<TabsContent value="basic" className="space-y-4">
-						<div className="space-y-4 pt-4">
-							<div className="grid gap-2">
-								<Label htmlFor="effect-type">エフェクトタイプ</Label>
-								<Select
-									value={currentSetting.effectType}
-									onValueChange={handleEffectChange}
-								>
-									<SelectTrigger id="effect-type">
-										<SelectValue placeholder="エフェクトを選択" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="dot">ドット</SelectItem>
-										<SelectItem value="explosion">爆発</SelectItem>
-										<SelectItem value="vertical">縦</SelectItem>
-										<SelectItem value="horizontal">横</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
+					{/* カラー設定 */}
+					<div className="grid gap-2">
+						<Label htmlFor="color-type">カラー</Label>
+						<Select
+							value={currentSetting.colorType}
+							onValueChange={handleColorChange}
+						>
+							<SelectTrigger id="color-type">
+								<SelectValue placeholder="カラーを選択" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="white">白</SelectItem>
+								<SelectItem value="red">赤</SelectItem>
+								<SelectItem value="orange">橙</SelectItem>
+								<SelectItem value="yellow">黄色</SelectItem>
+								<SelectItem value="yellow-green">黄緑</SelectItem>
+								<SelectItem value="green">緑</SelectItem>
+								<SelectItem value="blue-green">青緑</SelectItem>
+								<SelectItem value="light-blue">淡青</SelectItem>
+								<SelectItem value="blue">青</SelectItem>
+								<SelectItem value="purple">紫</SelectItem>
+								<SelectItem value="pink">ピンク</SelectItem>
+								<SelectItem value="red-purple">赤紫</SelectItem>
+								<SelectItem value="black">黒</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 
-							<div className="grid gap-2">
-								<Label>カラー</Label>
-								<div className="grid grid-cols-2 gap-2">
-									<div className="space-y-2">
-										<Select
-											value={currentSetting.colorType}
-											onValueChange={handleColorChange}
-										>
-											<SelectTrigger id="color-type">
-												<SelectValue placeholder="カラーを選択" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="white">白</SelectItem>
-												<SelectItem value="red">赤</SelectItem>
-												<SelectItem value="orange">橙</SelectItem>
-												<SelectItem value="yellow">黄色</SelectItem>
-												<SelectItem value="yellow-green">黄緑</SelectItem>
-												<SelectItem value="green">緑</SelectItem>
-												<SelectItem value="blue-green">青緑</SelectItem>
-												<SelectItem value="light-blue">淡青</SelectItem>
-												<SelectItem value="blue">青</SelectItem>
-												<SelectItem value="purple">紫</SelectItem>
-												<SelectItem value="pink">ピンク</SelectItem>
-												<SelectItem value="red-purple">赤紫</SelectItem>
-												<SelectItem value="black">黒</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-							</div>
+					{/* MIDI設定 */}
+					<div className="grid gap-2">
+						<Label htmlFor="midi-note">MIDI ノート</Label>
+						<div className="flex gap-2 items-center">
+							<Input
+								type="number"
+								id="midi-note"
+								min="0"
+								max="127"
+								value={currentSetting.midiNote}
+								onChange={(e) => handleMidiNoteChange(Number(e.target.value))}
+								className="w-24"
+							/>
+							<span className="text-sm text-muted-foreground">(0-127)</span>
 						</div>
-					</TabsContent>
+					</div>
 
-					<TabsContent value="advanced" className="space-y-4">
-						<div className="space-y-4 pt-4">
-							<div className="grid gap-2">
-								<Label htmlFor="midi-note">MIDI ノート</Label>
-								<div className="flex gap-2 items-center">
-									<Input
-										type="number"
-										id="midi-note"
-										min="0"
-										max="127"
-										value={currentSetting.midiNote}
-										onChange={(e) =>
-											handleMidiNoteChange(Number(e.target.value))
-										}
-										className="w-24"
-									/>
-									<span className="text-sm text-muted-foreground">(0-127)</span>
-								</div>
-							</div>
-
-							<div className="grid gap-2">
-								<Label htmlFor="output-device">出力デバイス番号</Label>
-								<div className="flex gap-2 items-center">
-									<Input
-										type="number"
-										id="output-device"
-										min="0"
-										max="127"
-										value={currentSetting.outputDeviceIndex}
-										onChange={(e) => handleDeviceChange(Number(e.target.value))}
-										className="w-24"
-									/>
-								</div>
-							</div>
+					{/* デバイス設定 */}
+					<div className="grid gap-2">
+						<Label htmlFor="output-device">出力デバイス番号</Label>
+						<div className="flex gap-2 items-center">
+							<Input
+								type="number"
+								id="output-device"
+								min="0"
+								max="127"
+								value={currentSetting.outputDeviceIndex}
+								onChange={(e) => handleDeviceChange(Number(e.target.value))}
+								className="w-24"
+							/>
 						</div>
-					</TabsContent>
-				</Tabs>
+					</div>
+				</div>
 
 				<div className="flex justify-end gap-2 mt-4">
 					<Button variant="outline" onClick={onClose}>
