@@ -16,39 +16,45 @@ export default function Home() {
 					</p>
 				</header>
 
-				{/* メインコンテンツ - lg以上で横並び */}
+				{/* メインコンテンツ */}
 				<div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-12">
-					{/* デバイス接続セクション */}
-					<section className="mb-12 lg:mb-0">
-						<div className="mb-6">
-							<h2 className="text-lg font-semibold text-muted-foreground">
-								デバイス接続
-							</h2>
-							<div className="h-0.5 w-12 bg-primary/50 mt-2" />
-						</div>
-						<div className="lg:sticky lg:top-8">
+					{/* 左カラム: デバイス接続とプリセット */}
+					<div className="space-y-8">
+						{/* デバイス接続セクション */}
+						<section>
+							<div className="mb-6">
+								<h2 className="text-lg font-semibold text-muted-foreground">
+									デバイス接続
+								</h2>
+								<div className="h-0.5 w-12 bg-primary/50 mt-2" />
+							</div>
 							<DeviceConnection />
-						</div>
-					</section>
+						</section>
 
-					{/* Launchpadコントローラーセクション */}
-					<section>
+						{/* プリセット管理セクション */}
+						<section>
+							<div className="mb-6">
+								<h2 className="text-lg font-semibold text-muted-foreground">
+									プリセット
+								</h2>
+								<div className="h-0.5 w-12 bg-primary/50 mt-2" />
+							</div>
+							<PresetManager />
+						</section>
+					</div>
+
+					{/* 右カラム: コントローラー */}
+					<section className="mt-8 lg:mt-0">
 						<div className="mb-6">
 							<h2 className="text-lg font-semibold text-muted-foreground">
 								コントローラー
 							</h2>
 							<div className="h-0.5 w-12 bg-primary/50 mt-2" />
 						</div>
-						<div className="flex justify-center">
+						<div className="flex justify-center lg:sticky lg:top-8">
 							<Launchpad />
 						</div>
 					</section>
-				</div>
-
-				{/* プリセット管理UI */}
-				<div className="bg-card rounded-lg p-4 shadow-sm mt-8">
-					<h2 className="text-xl font-semibold mb-4">プリセット</h2>
-					<PresetManager />
 				</div>
 
 				{/* フッター */}
