@@ -41,8 +41,8 @@ export function LaunchpadButtonSettings({
 		updateButtonSetting(y, x, { effectType: value });
 	};
 
-	const handleColorChange = (value: Color) => {
-		updateButtonSetting(y, x, { color: value });
+	const handleColorChange = (value: Color["colorType"]) => {
+		updateButtonSetting(y, x, { colorType: value });
 	};
 
 	const handleMidiNoteChange = (value: number) => {
@@ -100,13 +100,8 @@ export function LaunchpadButtonSettings({
 								<div className="grid grid-cols-2 gap-2">
 									<div className="space-y-2">
 										<Select
-											value={currentSetting.color.colorType}
-											onValueChange={(colorType: string) => {
-												handleColorChange({
-													colorType: colorType as Color["colorType"],
-													lightness: currentSetting.color.lightness,
-												});
-											}}
+											value={currentSetting.colorType}
+											onValueChange={handleColorChange}
 										>
 											<SelectTrigger id="color-type">
 												<SelectValue placeholder="カラーを選択" />
@@ -125,25 +120,6 @@ export function LaunchpadButtonSettings({
 												<SelectItem value="pink">ピンク</SelectItem>
 												<SelectItem value="red-purple">赤紫</SelectItem>
 												<SelectItem value="black">黒</SelectItem>
-											</SelectContent>
-										</Select>
-										<Select
-											value={String(currentSetting.color.lightness)}
-											onValueChange={(lightness: string) => {
-												handleColorChange({
-													colorType: currentSetting.color.colorType,
-													lightness: Number(lightness) as Color["lightness"],
-												});
-											}}
-										>
-											<SelectTrigger id="lightness">
-												<SelectValue placeholder="明るさを選択" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="0">0</SelectItem>
-												<SelectItem value="1">1</SelectItem>
-												<SelectItem value="2">2</SelectItem>
-												<SelectItem value="3">3</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>

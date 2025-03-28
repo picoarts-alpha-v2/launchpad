@@ -61,7 +61,14 @@ const sendMidiMessageDot = async (
 
 	// 点灯
 	const midi = coordinateToMidi(coordinate.x, coordinate.y);
-	midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
+	midiOutput.send([
+		inputStatus,
+		midi,
+		colorToVelocity({
+			colorType: buttonSetting.colorType,
+			lightness: 2,
+		}),
+	]);
 	return;
 };
 
@@ -86,7 +93,14 @@ const sendMidiMessageHorizontal = async (
 	// 横一列に点灯
 	for (let i = 0; i <= 7; i++) {
 		const midi = coordinateToMidi(i, coordinate.y);
-		midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
+		midiOutput.send([
+			inputStatus,
+			midi,
+			colorToVelocity({
+				colorType: buttonSetting.colorType,
+				lightness: 2,
+			}),
+		]);
 	}
 	return;
 };
@@ -112,7 +126,14 @@ const sendMidiMessageVertical = async (
 	// 縦一列に点灯
 	for (let i = 0; i <= 7; i++) {
 		const midi = coordinateToMidi(coordinate.x, i);
-		midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
+		midiOutput.send([
+			inputStatus,
+			midi,
+			colorToVelocity({
+				colorType: buttonSetting.colorType,
+				lightness: 2,
+			}),
+		]);
 	}
 	return;
 };
@@ -138,7 +159,10 @@ const sendMidiMessageExplosion = async (
 			midiOutput.send([
 				inputStatus,
 				midi,
-				colorToVelocity(buttonSetting.color),
+				colorToVelocity({
+					colorType: buttonSetting.colorType,
+					lightness: 3,
+				}),
 			]);
 		}
 	}
@@ -162,7 +186,10 @@ const sendMidiMessageExplosion = async (
 			midiOutput.send([
 				inputStatus,
 				midi,
-				colorToVelocity(buttonSetting.color),
+				colorToVelocity({
+					colorType: buttonSetting.colorType,
+					lightness: 2,
+				}),
 			]);
 		}
 	}
@@ -186,7 +213,10 @@ const sendMidiMessageExplosion = async (
 			midiOutput.send([
 				inputStatus,
 				midi,
-				colorToVelocity(buttonSetting.color),
+				colorToVelocity({
+					colorType: buttonSetting.colorType,
+					lightness: 1,
+				}),
 			]);
 		}
 	}

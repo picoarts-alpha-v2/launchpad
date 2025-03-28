@@ -22,10 +22,7 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 				.fill(null)
 				.map(() => ({
 					effectType: "explosion",
-					color: {
-						colorType: "white",
-						lightness: 3,
-					},
+					colorType: "white",
 					midiNote: 60,
 					outputDeviceIndex: 0,
 				})),
