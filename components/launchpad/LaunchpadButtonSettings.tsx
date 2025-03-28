@@ -20,7 +20,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/stores/store";
 import type { ButtonSetting } from "@/stores/types";
-import { useState } from "react";
 
 interface LaunchpadButtonSettingsProps {
 	isOpen: boolean;

@@ -48,11 +48,11 @@ const sendMidiMessageDot = async (
 	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
-	// 消灯
-	if (inputVelocity === 0) {
-		midiOutput.send([inputStatus, inputNote, 0]);
-		return;
-	}
+	// // 消灯
+	// if (inputVelocity === 0) {
+	// 	midiOutput.send([inputStatus, inputNote, 0]);
+	// 	return;
+	// }
 
 	// 点灯
 	const midi = coordinateToMidi(coordinate.x, coordinate.y);
