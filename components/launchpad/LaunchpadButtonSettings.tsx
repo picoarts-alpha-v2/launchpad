@@ -124,6 +124,7 @@ export function LaunchpadButtonSettings({
 												<SelectItem value="purple">紫</SelectItem>
 												<SelectItem value="pink">ピンク</SelectItem>
 												<SelectItem value="red-purple">赤紫</SelectItem>
+												<SelectItem value="black">黒</SelectItem>
 											</SelectContent>
 										</Select>
 										<Select

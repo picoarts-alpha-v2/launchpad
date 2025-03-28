@@ -1,7 +1,7 @@
+import { colorVelocityList, velocityToColor } from "@/utils/utils";
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
 import type { ButtonSetting } from "../types";
-import { colorVelocityList } from "@/utils/utils";
 
 export interface LaunchpadSlice {
 	buttonSettings: ButtonSetting[][];
@@ -17,20 +17,14 @@ export interface LaunchpadSlice {
 const createInitialButtonSettings = (): ButtonSetting[][] => {
 	return Array(8)
 		.fill(null)
-		.map((_, indexY) =>
+		.map(() =>
 			Array(8)
 				.fill(null)
-				.map((_, indexX) => ({
-					effectType: "dot",
+				.map(() => ({
+					effectType: "explosion",
 					color: {
-						colorType:
-							colorVelocityList?.[indexX + indexY * 8]?.colorType === undefined
-								? "white"
-								: colorVelocityList[indexX + indexY * 8].colorType,
-						lightness:
-							colorVelocityList?.[indexX + indexY * 8]?.lightness === undefined
-								? 0
-								: colorVelocityList[indexX + indexY * 8].lightness,
+						colorType: "white",
+						lightness: 3,
 					},
 					midiNote: 60,
 					outputDeviceIndex: 0,
