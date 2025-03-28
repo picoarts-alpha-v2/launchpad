@@ -66,4 +66,17 @@ export const presetManager = {
 
 		return true;
 	},
+
+	updatePreset(presetId: string, settings: ButtonSetting[][]): boolean {
+		const presets = this.getPresets();
+		const preset = presets.find((p) => p.id === presetId);
+
+		if (!preset) return false;
+
+		preset.settings = JSON.parse(JSON.stringify(settings));
+		preset.updatedAt = new Date().toISOString();
+		localStorage.setItem("launchpad-presets", JSON.stringify(presets));
+
+		return true;
+	},
 };

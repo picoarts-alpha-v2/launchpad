@@ -1,7 +1,7 @@
+import { presetManager } from "@/utils/presetManager";
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
 import type { ButtonSetting } from "../types";
-import { presetManager } from "@/utils/presetManager";
 
 export interface LaunchpadSlice {
 	buttonSettings: ButtonSetting[][];

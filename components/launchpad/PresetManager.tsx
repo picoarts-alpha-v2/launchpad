@@ -1,10 +1,5 @@
 "use client";
 
-import { presetManager } from "@/utils/presetManager";
-import { useStore } from "@/stores/store";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,28 +11,74 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlusCircle, Save, Trash2, Download } from "lucide-react";
+import { useStore } from "@/stores/store";
+import { presetManager } from "@/utils/presetManager";
+import {
+	Download,
+	Loader2,
+	PlusCircle,
+	RefreshCw,
+	Save,
+	Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function PresetManager() {
 	const { buttonSettings, loadPresetToState } = useStore();
 	const [presets, setPresets] = useState(() => presetManager.getPresets());
 	const [newPresetName, setNewPresetName] = useState("");
+	const [loadingPresetId, setLoadingPresetId] = useState<string | null>(null);
 
 	const handleSavePreset = () => {
 		if (!newPresetName.trim()) return;
 		const newPreset = presetManager.savePreset(newPresetName, buttonSettings);
 		setPresets(presetManager.getPresets());
 		setNewPresetName("");
+		toast.success("プリセットを保存しました", {
+			description: `"${newPresetName}" を保存しました`,
+		});
 	};
 
-	const handleLoadPreset = (presetId: string) => {
-		loadPresetToState(presetId);
+	const handleLoadPreset = async (presetId: string) => {
+		setLoadingPresetId(presetId);
+		const preset = presets.find((p) => p.id === presetId);
+
+		try {
+			loadPresetToState(presetId);
+			toast.success("プリセットを読み込みました", {
+				description: `"${preset?.name}" を適用しました`,
+			});
+		} catch (error) {
+			toast.error("プリセットの読み込みに失敗しました", {
+				description: "エラーが発生しました",
+			});
+		} finally {
+			setLoadingPresetId(null);
+		}
 	};
 
 	const handleDeletePreset = (presetId: string) => {
+		const preset = presets.find((p) => p.id === presetId);
 		presetManager.deletePreset(presetId);
 		setPresets(presetManager.getPresets());
+		toast.success("プリセットを削除しました", {
+			description: `"${preset?.name}" を削除しました`,
+		});
+	};
+
+	const handleOverwritePreset = (presetId: string) => {
+		const preset = presets.find((p) => p.id === presetId);
+		if (!preset) return;
+
+		presetManager.updatePreset(presetId, buttonSettings);
+		setPresets(presetManager.getPresets());
+		toast.success("プリセットを上書きしました", {
+			description: `"${preset.name}" を更新しました`,
+		});
 	};
 
 	return (
@@ -97,13 +138,49 @@ export function PresetManager() {
 								</div>
 								<div className="flex gap-2">
 									<Button
-										variant="secondary"
+										variant="default"
 										size="sm"
 										onClick={() => handleLoadPreset(preset.id)}
+										disabled={loadingPresetId === preset.id}
+										className="min-w-[100px]"
 									>
-										<Download className="h-4 w-4 mr-2" />
-										読み込み
+										{loadingPresetId === preset.id ? (
+											<>
+												<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+												読み込み中
+											</>
+										) : (
+											<>
+												<Download className="h-4 w-4 mr-2" />
+												読み込み
+											</>
+										)}
 									</Button>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button variant="outline" size="sm">
+												<RefreshCw className="h-4 w-4" />
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>プリセットの上書き</AlertDialogTitle>
+												<AlertDialogDescription>
+													「{preset.name}」に現在の設定を上書きしますか？
+													この操作は取り消せません。
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>キャンセル</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() => handleOverwritePreset(preset.id)}
+												>
+													<Save className="h-4 w-4 mr-2" />
+													上書き
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
 									<AlertDialog>
 										<AlertDialogTrigger asChild>
 											<Button variant="destructive" size="sm">
