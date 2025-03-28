@@ -9,7 +9,7 @@ export type ButtonSetting = {
 	effectType: "dot" | "explosion" | "vertical" | "horizontal";
 	color: number;
 	midiNote: number;
-	outputDeviceId: string | null;
+	outputDeviceIndex: number;
 };
 
 export type Coordinate = {

@@ -23,7 +23,7 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 					effectType: "explosion",
 					color: 127,
 					midiNote: 60,
-					outputDeviceId: null,
+					outputDeviceIndex: 0,
 				})),
 		);
 };

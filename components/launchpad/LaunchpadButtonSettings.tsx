@@ -42,16 +42,16 @@ export function LaunchpadButtonSettings({
 		updateButtonSetting(y, x, { effectType: value });
 	};
 
-	const handleColorChange = (value: string) => {
-		updateButtonSetting(y, x, { color: Number.parseInt(value) });
+	const handleColorChange = (value: number) => {
+		updateButtonSetting(y, x, { color: value });
 	};
 
-	const handleMidiNoteChange = (value: string) => {
-		updateButtonSetting(y, x, { midiNote: Number.parseInt(value) });
+	const handleMidiNoteChange = (value: number) => {
+		updateButtonSetting(y, x, { midiNote: value });
 	};
 
-	const handleDeviceChange = (value: string) => {
-		updateButtonSetting(y, x, { outputDeviceId: value });
+	const handleDeviceChange = (value: number) => {
+		updateButtonSetting(y, x, { outputDeviceIndex: value });
 	};
 
 	if (!currentSetting) {
@@ -106,7 +106,9 @@ export function LaunchpadButtonSettings({
 											min="0"
 											max="127"
 											value={currentSetting.color}
-											onChange={(e) => handleColorChange(e.target.value)}
+											onChange={(e) =>
+												handleColorChange(Number(e.target.value))
+											}
 											className="w-24"
 										/>
 										<span className="text-sm text-muted-foreground">
@@ -129,7 +131,9 @@ export function LaunchpadButtonSettings({
 										min="0"
 										max="127"
 										value={currentSetting.midiNote}
-										onChange={(e) => handleMidiNoteChange(e.target.value)}
+										onChange={(e) =>
+											handleMidiNoteChange(Number(e.target.value))
+										}
 										className="w-24"
 									/>
 									<span className="text-sm text-muted-foreground">(0-127)</span>
@@ -137,19 +141,18 @@ export function LaunchpadButtonSettings({
 							</div>
 
 							<div className="grid gap-2">
-								<Label htmlFor="output-device">出力デバイス</Label>
-								<Select
-									value={currentSetting.outputDeviceId || ""}
-									onValueChange={handleDeviceChange}
-								>
-									<SelectTrigger id="output-device">
-										<SelectValue placeholder="出力デバイスを選択" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="device1">デバイス1</SelectItem>
-										<SelectItem value="device2">デバイス2</SelectItem>
-									</SelectContent>
-								</Select>
+								<Label htmlFor="output-device">出力デバイス番号</Label>
+								<div className="flex gap-2 items-center">
+									<Input
+										type="number"
+										id="output-device"
+										min="0"
+										max="127"
+										value={currentSetting.outputDeviceIndex}
+										onChange={(e) => handleDeviceChange(Number(e.target.value))}
+										className="w-24"
+									/>
+								</div>
 							</div>
 						</div>
 					</TabsContent>
