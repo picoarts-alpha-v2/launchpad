@@ -1,6 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
 import type { ButtonSetting } from "../types";
+import { colorVelocityList } from "@/utils/utils";
 
 export interface LaunchpadSlice {
 	buttonSettings: ButtonSetting[][];
@@ -21,7 +22,16 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 				.fill(null)
 				.map((_, indexX) => ({
 					effectType: "dot",
-					color: indexX + indexY * 8,
+					color: {
+						colorType:
+							colorVelocityList?.[indexX + indexY * 8]?.colorType === undefined
+								? "white"
+								: colorVelocityList[indexX + indexY * 8].colorType,
+						lightness:
+							colorVelocityList?.[indexX + indexY * 8]?.lightness === undefined
+								? 0
+								: colorVelocityList[indexX + indexY * 8].lightness,
+					},
 					midiNote: 60,
 					outputDeviceIndex: 0,
 				})),

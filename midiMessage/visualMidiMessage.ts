@@ -1,5 +1,10 @@
 import type { ButtonSetting, MIDIDevice } from "@/stores/types";
-import { coordinateToMidi, midiToCoordinate, sleep } from "@/utils/utils";
+import {
+	colorToVelocity,
+	coordinateToMidi,
+	midiToCoordinate,
+	sleep,
+} from "@/utils/utils";
 
 export const handleSendVisualMidiMessage = async (
 	event: WebMidi.MIDIMessageEvent,
@@ -48,15 +53,15 @@ const sendMidiMessageDot = async (
 	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
-	// // 消灯
-	// if (inputVelocity === 0) {
-	// 	midiOutput.send([inputStatus, inputNote, 0]);
-	// 	return;
-	// }
+	// 消灯
+	if (inputVelocity === 0) {
+		midiOutput.send([inputStatus, inputNote, 0]);
+		return;
+	}
 
 	// 点灯
 	const midi = coordinateToMidi(coordinate.x, coordinate.y);
-	midiOutput.send([inputStatus, midi, buttonSetting.color]);
+	midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
 	return;
 };
 
@@ -81,7 +86,7 @@ const sendMidiMessageHorizontal = async (
 	// 横一列に点灯
 	for (let i = 0; i <= 7; i++) {
 		const midi = coordinateToMidi(i, coordinate.y);
-		midiOutput.send([inputStatus, midi, buttonSetting.color]);
+		midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
 	}
 	return;
 };
@@ -107,7 +112,7 @@ const sendMidiMessageVertical = async (
 	// 縦一列に点灯
 	for (let i = 0; i <= 7; i++) {
 		const midi = coordinateToMidi(coordinate.x, i);
-		midiOutput.send([inputStatus, midi, buttonSetting.color]);
+		midiOutput.send([inputStatus, midi, colorToVelocity(buttonSetting.color)]);
 	}
 	return;
 };
@@ -130,7 +135,11 @@ const sendMidiMessageExplosion = async (
 	for (let i = -1; i <= 1; i++) {
 		for (let j = -1; j <= 1; j++) {
 			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			midiOutput.send([
+				inputStatus,
+				midi,
+				colorToVelocity(buttonSetting.color),
+			]);
 		}
 	}
 	await sleep(50);
@@ -150,7 +159,11 @@ const sendMidiMessageExplosion = async (
 				continue;
 			}
 			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			midiOutput.send([
+				inputStatus,
+				midi,
+				colorToVelocity(buttonSetting.color),
+			]);
 		}
 	}
 
@@ -170,7 +183,11 @@ const sendMidiMessageExplosion = async (
 				continue;
 			}
 			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, buttonSetting.color]);
+			midiOutput.send([
+				inputStatus,
+				midi,
+				colorToVelocity(buttonSetting.color),
+			]);
 		}
 	}
 

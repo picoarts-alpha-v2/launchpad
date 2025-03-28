@@ -19,15 +19,15 @@ export const sleep = (ms: number) => {
 
 // 色と明るさとベロシティのリスト
 type ColorVelocity = Color & { velocity: number };
-const colorVelocityList: ColorVelocity[] = [
+export const colorVelocityList: ColorVelocity[] = [
 	{ colorType: "white", lightness: 0, velocity: 0 },
 	{ colorType: "white", lightness: 1, velocity: 1 },
 	{ colorType: "white", lightness: 2, velocity: 2 },
 	{ colorType: "white", lightness: 3, velocity: 3 },
-	{ colorType: "red", lightness: 0, velocity: 4 },
-	{ colorType: "red", lightness: 1, velocity: 5 },
-	{ colorType: "red", lightness: 2, velocity: 6 },
-	{ colorType: "red", lightness: 3, velocity: 7 },
+	{ colorType: "red", lightness: 0, velocity: 8 },
+	{ colorType: "red", lightness: 1, velocity: 9 },
+	{ colorType: "red", lightness: 2, velocity: 10 },
+	{ colorType: "red", lightness: 3, velocity: 11 },
 	{ colorType: "orange", lightness: 0, velocity: 8 },
 	{ colorType: "orange", lightness: 1, velocity: 9 },
 	{ colorType: "orange", lightness: 2, velocity: 10 },

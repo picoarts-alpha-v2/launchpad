@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/stores/store";
-import type { ButtonSetting } from "@/stores/types";
+import type { ButtonSetting, Color } from "@/stores/types";
 
 interface LaunchpadButtonSettingsProps {
 	isOpen: boolean;
@@ -41,7 +41,7 @@ export function LaunchpadButtonSettings({
 		updateButtonSetting(y, x, { effectType: value });
 	};
 
-	const handleColorChange = (value: number) => {
+	const handleColorChange = (value: Color) => {
 		updateButtonSetting(y, x, { color: value });
 	};
 
@@ -99,20 +99,52 @@ export function LaunchpadButtonSettings({
 								<Label>カラー</Label>
 								<div className="grid grid-cols-2 gap-2">
 									<div className="space-y-2">
-										<Input
-											type="number"
-											id="color"
-											min="0"
-											max="127"
-											value={currentSetting.color}
-											onChange={(e) =>
-												handleColorChange(Number(e.target.value))
-											}
-											className="w-24"
-										/>
-										<span className="text-sm text-muted-foreground">
-											(0-127)
-										</span>
+										<Select
+											value={currentSetting.color.colorType}
+											onValueChange={(colorType: string) => {
+												handleColorChange({
+													colorType: colorType as Color["colorType"],
+													lightness: currentSetting.color.lightness,
+												});
+											}}
+										>
+											<SelectTrigger id="color-type">
+												<SelectValue placeholder="カラーを選択" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="white">白</SelectItem>
+												<SelectItem value="red">赤</SelectItem>
+												<SelectItem value="orange">橙</SelectItem>
+												<SelectItem value="yellow">黄色</SelectItem>
+												<SelectItem value="yellow-green">黄緑</SelectItem>
+												<SelectItem value="green">緑</SelectItem>
+												<SelectItem value="blue-green">青緑</SelectItem>
+												<SelectItem value="light-blue">淡青</SelectItem>
+												<SelectItem value="blue">青</SelectItem>
+												<SelectItem value="purple">紫</SelectItem>
+												<SelectItem value="pink">ピンク</SelectItem>
+												<SelectItem value="red-purple">赤紫</SelectItem>
+											</SelectContent>
+										</Select>
+										<Select
+											value={String(currentSetting.color.lightness)}
+											onValueChange={(lightness: string) => {
+												handleColorChange({
+													colorType: currentSetting.color.colorType,
+													lightness: Number(lightness) as Color["lightness"],
+												});
+											}}
+										>
+											<SelectTrigger id="lightness">
+												<SelectValue placeholder="明るさを選択" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="0">0</SelectItem>
+												<SelectItem value="1">1</SelectItem>
+												<SelectItem value="2">2</SelectItem>
+												<SelectItem value="3">3</SelectItem>
+											</SelectContent>
+										</Select>
 									</div>
 								</div>
 							</div>

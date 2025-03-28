@@ -7,7 +7,7 @@ export interface MIDIDevice {
 
 export type ButtonSetting = {
 	effectType: "dot" | "explosion" | "vertical" | "horizontal";
-	color: number;
+	color: Color;
 	midiNote: number;
 	outputDeviceIndex: number;
 };
