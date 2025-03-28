@@ -1,3 +1,4 @@
+import { handleSendPlaybackMidiMessage } from "@/midiMessage/playbackMidiMessage";
 import { handleSendVisualMidiMessage } from "@/midiMessage/visualMidiMessage";
 import { coordinateToMidi, midiToCoordinate, sleep } from "@/utils/utils";
 import { toast } from "sonner";
@@ -123,19 +124,12 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 		if (newInput) {
 			const midiInput = newInput.port as WebMidi.MIDIInput;
 			midiInput.onmidimessage = async (event) => {
-				const [inputStatus, inputNote, inputVelocity] = event.data;
-				// 再生用出力デバイスにメッセージを送信
-				// ToDo:あとで設定できるようにする
-				// biome-ignore lint/complexity/noForEach: <explanation>
-				get().selectedPlaybackOutputDeviceIdList.forEach((outputId) => {
-					const output = get().devices.find(
-						(d) => d.type === "output" && d.id === outputId,
-					);
-					if (output) {
-						const midiOutput = output.port as WebMidi.MIDIOutput;
-						midiOutput.send([inputStatus, inputNote, inputVelocity]);
-					}
-				});
+				handleSendPlaybackMidiMessage(
+					event,
+					get().devices,
+					get().selectedPlaybackOutputDeviceIdList,
+					get().buttonSettings,
+				);
 
 				// 映像用出力デバイスにメッセージを送信
 				handleSendVisualMidiMessage(
