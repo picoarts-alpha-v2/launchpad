@@ -1,5 +1,6 @@
 import { DeviceConnection } from "@/components/deviceConnection/deviceConnection";
 import { Launchpad } from "@/components/launchpad/LaunchPad";
+import { PresetManager } from "@/components/launchpad/PresetManager";
 
 export default function Home() {
 	return (
@@ -42,6 +43,12 @@ export default function Home() {
 							<Launchpad />
 						</div>
 					</section>
+				</div>
+
+				{/* プリセット管理UI */}
+				<div className="bg-card rounded-lg p-4 shadow-sm mt-8">
+					<h2 className="text-xl font-semibold mb-4">プリセット</h2>
+					<PresetManager />
 				</div>
 
 				{/* フッター */}

@@ -1,7 +1,7 @@
-import { colorVelocityList, velocityToColor } from "@/utils/utils";
 import type { StateCreator } from "zustand";
 import type { RootState } from "../store";
 import type { ButtonSetting } from "../types";
+import { presetManager } from "@/utils/presetManager";
 
 export interface LaunchpadSlice {
 	buttonSettings: ButtonSetting[][];
@@ -12,6 +12,7 @@ export interface LaunchpadSlice {
 	) => void;
 	resetButtonSettings: () => void;
 	getButtonSetting: (row: number, col: number) => ButtonSetting;
+	loadPresetToState: (presetId: string) => void;
 }
 
 const createInitialButtonSettings = (): ButtonSetting[][] => {
@@ -56,4 +57,12 @@ export const createLaunchpadSlice: StateCreator<
 
 	getButtonSetting: (row: number, col: number) =>
 		get().buttonSettings[row][col],
+
+	// プリセットをステートに読み込む
+	loadPresetToState: (presetId: string) => {
+		const settings = presetManager.loadPreset(presetId);
+		if (settings) {
+			set({ buttonSettings: settings });
+		}
+	},
 });
