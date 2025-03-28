@@ -20,7 +20,7 @@ const createInitialButtonSettings = (): ButtonSetting[][] => {
 			Array(8)
 				.fill(null)
 				.map(() => ({
-					effectType: "horizontal",
+					effectType: "explosion",
 					color: 127,
 					midiNote: 60,
 					outputDeviceId: null,
