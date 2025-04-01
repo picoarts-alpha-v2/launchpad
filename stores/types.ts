@@ -34,3 +34,18 @@ export type Color = {
 		| "black"; //黒
 	lightness: number; //0~1
 };
+
+export type LightnessListList = (
+	| number //0~1
+	| null
+)[][];
+
+export type LightnessAnimationPage = {
+	lightnessListList: LightnessListList;
+	centerCoordinate: { x: number; y: number };
+};
+
+export type LightnessAnimation = {
+	pages: LightnessAnimationPage[];
+	duration: number;
+};

@@ -1,4 +1,10 @@
-import type { ButtonSetting, Color, MIDIDevice } from "@/stores/types";
+import type {
+	ButtonSetting,
+	Color,
+	LightnessAnimationPage,
+	LightnessListList,
+	MIDIDevice,
+} from "@/stores/types";
 import {
 	colorToRGB,
 	coordinateToMidi,
@@ -44,11 +50,54 @@ const effectTypeBranch = async (
 	}
 };
 
-const sendLedMidiMessage = async (
+const sendLightnessAnimationPage = (
+	device: MIDIDevice,
+	colorType: Color["colorType"],
+	pressedCoordinate: { x: number; y: number },
+	lightnessAnimationPage: LightnessAnimationPage,
+) => {
+	let x = 0;
+	let y = 0;
+	for (const lightnessList of lightnessAnimationPage.lightnessListList.reverse()) {
+		x = 0;
+		for (const lightness of lightnessList) {
+			if (lightness === null) {
+				x = x + 1;
+				continue;
+			}
+			sendLedMidiMessage(
+				device,
+				{
+					colorType,
+					lightness,
+				},
+				{
+					x:
+						pressedCoordinate.x - lightnessAnimationPage.centerCoordinate.x + x,
+					y:
+						pressedCoordinate.y - lightnessAnimationPage.centerCoordinate.y + y,
+				},
+			);
+			x = x + 1;
+		}
+		y = y + 1;
+	}
+};
+
+const sendLedMidiMessage = (
 	device: MIDIDevice,
 	color: Color,
 	coordinate: { x: number; y: number },
 ) => {
+	// 座標が範囲を超えたらなにもしない
+	if (
+		coordinate.x < 0 ||
+		coordinate.x > 7 ||
+		coordinate.y < 0 ||
+		coordinate.y > 7
+	) {
+		return;
+	}
 	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const rgb = colorToRGB(color);
 	const note = coordinateToMidi(coordinate.x, coordinate.y);
@@ -75,7 +124,6 @@ const sendMidiMessageDot = async (
 	buttonSetting: ButtonSetting,
 	coordinate: { x: number; y: number },
 ) => {
-	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
 	// 消灯
@@ -110,35 +158,33 @@ const sendMidiMessageHorizontal = async (
 	buttonSetting: ButtonSetting,
 	coordinate: { x: number; y: number },
 ) => {
-	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
 	// 消灯
 	if (inputVelocity === 0) {
-		for (let i = 0; i <= 7; i++) {
-			sendLedMidiMessage(
-				device,
-				{
-					colorType: "black",
-					lightness: 0,
-				},
-				{ x: i, y: coordinate.y },
-			);
-		}
+		sendLightnessAnimationPage(device, "black", coordinate, {
+			lightnessListList: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+			centerCoordinate: {
+				x: 7,
+				y: 0,
+			},
+		});
 		return;
 	}
 
 	// 横一列に点灯
-	for (let i = 0; i <= 7; i++) {
-		sendLedMidiMessage(
-			device,
-			{
-				colorType: buttonSetting.colorType,
-				lightness: 1,
-			},
-			{ x: i, y: coordinate.y },
-		);
-	}
+	sendLightnessAnimationPage(device, buttonSetting.colorType, coordinate, {
+		lightnessListList: [
+			[
+				0.01, 0.02, 0.03, 0.05, 0.1, 0.3, 0.5, 1, 0.5, 0.3, 0.1, 0.05, 0.03,
+				0.02, 0.01,
+			],
+		],
+		centerCoordinate: {
+			x: 7,
+			y: 0,
+		},
+	});
 	return;
 };
 
@@ -148,35 +194,54 @@ const sendMidiMessageVertical = async (
 	buttonSetting: ButtonSetting,
 	coordinate: { x: number; y: number },
 ) => {
-	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
 	// 消灯
 	if (inputVelocity === 0) {
-		for (let i = 0; i <= 7; i++) {
-			sendLedMidiMessage(
-				device,
-				{
-					colorType: "black",
-					lightness: 0,
-				},
-				{ x: coordinate.x, y: i },
-			);
-		}
+		sendLightnessAnimationPage(device, "black", coordinate, {
+			lightnessListList: [
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+				[0], //中心
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+				[0],
+			],
+			centerCoordinate: { x: 0, y: 7 },
+		});
 		return;
 	}
 
 	// 縦一列に点灯
-	for (let i = 0; i <= 7; i++) {
-		sendLedMidiMessage(
-			device,
-			{
-				colorType: buttonSetting.colorType,
-				lightness: 1,
-			},
-			{ x: coordinate.x, y: i },
-		);
-	}
+	sendLightnessAnimationPage(device, buttonSetting.colorType, coordinate, {
+		lightnessListList: [
+			[0.01],
+			[0.02],
+			[0.03],
+			[0.05],
+			[0.1],
+			[0.3],
+			[0.5],
+			[1], //中心
+			[0.5],
+			[0.3],
+			[0.1],
+			[0.05],
+			[0.03],
+			[0.02],
+			[0.01],
+		],
+		centerCoordinate: { x: 0, y: 7 },
+	});
 	return;
 };
 
