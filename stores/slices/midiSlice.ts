@@ -31,7 +31,11 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 
 	deviceInitialize: async () => {
 		try {
-			const midiAccess = await navigator.requestMIDIAccess();
+			const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+			if (!midiAccess.sysexEnabled) {
+				toast.error("MIDIデバイスへのアクセスに失敗しました");
+				return;
+			}
 			const devices: MIDIDevice[] = [];
 
 			// 入力デバイスの取得

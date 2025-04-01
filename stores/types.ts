@@ -32,5 +32,5 @@ export type Color = {
 		| "pink" //ピンク
 		| "red-purple" // 赤紫
 		| "black"; //黒
-	lightness: 0 | 1 | 2 | 3;
+	lightness: number; //0~1
 };

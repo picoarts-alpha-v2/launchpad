@@ -17,88 +17,56 @@ export const sleep = (ms: number) => {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-// 色と明るさとベロシティのリスト
-type ColorVelocity = Color & { velocity: number };
-export const colorVelocityList: ColorVelocity[] = [
-	{ colorType: "white", lightness: 0, velocity: 117 },
-	{ colorType: "white", lightness: 1, velocity: 1 },
-	{ colorType: "white", lightness: 2, velocity: 2 },
-	{ colorType: "white", lightness: 3, velocity: 3 },
-	{ colorType: "red", lightness: 0, velocity: 7 },
-	{ colorType: "red", lightness: 1, velocity: 6 },
-	{ colorType: "red", lightness: 2, velocity: 5 },
-	{ colorType: "red", lightness: 3, velocity: 4 },
-	{ colorType: "orange", lightness: 0, velocity: 11 },
-	{ colorType: "orange", lightness: 1, velocity: 10 },
-	{ colorType: "orange", lightness: 2, velocity: 9 },
-	{ colorType: "orange", lightness: 3, velocity: 8 },
-	{ colorType: "yellow", lightness: 0, velocity: 15 },
-	{ colorType: "yellow", lightness: 1, velocity: 14 },
-	{ colorType: "yellow", lightness: 2, velocity: 13 },
-	{ colorType: "yellow", lightness: 3, velocity: 12 },
-	{ colorType: "yellow-green", lightness: 0, velocity: 19 },
-	{ colorType: "yellow-green", lightness: 1, velocity: 18 },
-	{ colorType: "yellow-green", lightness: 2, velocity: 17 },
-	{ colorType: "yellow-green", lightness: 3, velocity: 16 },
-	{ colorType: "green", lightness: 0, velocity: 27 },
-	{ colorType: "green", lightness: 1, velocity: 26 },
-	{ colorType: "green", lightness: 2, velocity: 25 },
-	{ colorType: "green", lightness: 3, velocity: 24 },
-	{ colorType: "blue-green", lightness: 0, velocity: 35 },
-	{ colorType: "blue-green", lightness: 1, velocity: 34 },
-	{ colorType: "blue-green", lightness: 2, velocity: 33 },
-	{ colorType: "blue-green", lightness: 3, velocity: 32 },
-	{ colorType: "light-blue", lightness: 0, velocity: 43 },
-	{ colorType: "light-blue", lightness: 1, velocity: 42 },
-	{ colorType: "light-blue", lightness: 2, velocity: 41 },
-	{ colorType: "light-blue", lightness: 3, velocity: 40 },
-	{ colorType: "blue", lightness: 0, velocity: 47 },
-	{ colorType: "blue", lightness: 1, velocity: 46 },
-	{ colorType: "blue", lightness: 2, velocity: 45 },
-	{ colorType: "blue", lightness: 3, velocity: 44 },
-	{ colorType: "purple", lightness: 0, velocity: 51 },
-	{ colorType: "purple", lightness: 1, velocity: 50 },
-	{ colorType: "purple", lightness: 2, velocity: 49 },
-	{ colorType: "purple", lightness: 3, velocity: 48 },
-	{ colorType: "pink", lightness: 0, velocity: 55 },
-	{ colorType: "pink", lightness: 1, velocity: 54 },
-	{ colorType: "pink", lightness: 2, velocity: 53 },
-	{ colorType: "pink", lightness: 3, velocity: 52 },
-	{ colorType: "red-purple", lightness: 0, velocity: 59 },
-	{ colorType: "red-purple", lightness: 1, velocity: 58 },
-	{ colorType: "red-purple", lightness: 2, velocity: 57 },
-	{ colorType: "red-purple", lightness: 3, velocity: 56 },
-	{ colorType: "black", lightness: 0, velocity: 0 },
-	{ colorType: "black", lightness: 1, velocity: 0 },
-	{ colorType: "black", lightness: 2, velocity: 0 },
-	{ colorType: "black", lightness: 3, velocity: 0 },
-];
-
-// 色と明るさをベロシティに変換する
-export const colorToVelocity = (color: Color): number => {
-	const colorVelocity = colorVelocityList.find(
-		(colorVelocity) =>
-			colorVelocity.colorType === color.colorType &&
-			colorVelocity.lightness === color.lightness,
-	);
-	// 無かったら黒
-	if (!colorVelocity) {
-		return 0;
+// colorTypeをRGBに変換する。
+export const colorTypeToHue = (colorType: Color["colorType"]) => {
+	switch (colorType) {
+		case "red":
+			return { r: 0x3f, g: 0, b: 0 };
+		case "orange":
+			return { r: 0x3f, g: 0x20, b: 0 };
+		case "yellow":
+			return { r: 0x3f, g: 0x3f, b: 0 };
+		case "yellow-green":
+			return { r: 0x20, g: 0x3f, b: 0x0 };
+		case "green":
+			return { r: 0, g: 0x3f, b: 0 };
+		case "blue-green":
+			return { r: 0, g: 0x3f, b: 0x3f };
+		case "light-blue":
+			return { r: 0, g: 0x20, b: 0x3f };
+		case "blue":
+			return { r: 0, g: 0, b: 0x3f };
+		case "purple":
+			return { r: 0x20, g: 0, b: 0x3f };
+		case "pink":
+			return { r: 0x3f, g: 0, b: 0x3f };
+		case "red-purple":
+			return { r: 0x3f, g: 0, b: 0x20 };
+		case "black":
+			return { r: 0, g: 0, b: 0 };
+		case "white":
+			return { r: 0x3f, g: 0x3f, b: 0x3f };
+		default:
+			return { r: 0, g: 0, b: 0 };
 	}
-	return colorVelocity.velocity;
 };
 
-// ベロシティを色と明るさに変換する
-export const velocityToColor = (velocity: number): Color => {
-	const colorVelocity = colorVelocityList.find(
-		(colorVelocity) => colorVelocity.velocity === velocity,
-	);
-	// 無かったら黒
-	if (!colorVelocity) {
-		return { colorType: "black", lightness: 0 };
+export const colorToRGB = (color: Color) => {
+	const hue = colorTypeToHue(color.colorType);
+	let lightness = color.lightness;
+
+	// lightnessは0~1の範囲にする
+	if (lightness > 1) {
+		lightness = 1;
 	}
-	return {
-		colorType: colorVelocity.colorType,
-		lightness: colorVelocity.lightness,
+	if (lightness < 0) {
+		lightness = 0;
+	}
+
+	const rgb = {
+		r: Math.floor(hue.r * lightness),
+		g: Math.floor(hue.g * lightness),
+		b: Math.floor(hue.b * lightness),
 	};
+	return rgb;
 };

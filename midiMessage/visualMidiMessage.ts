@@ -1,6 +1,6 @@
-import type { ButtonSetting, MIDIDevice } from "@/stores/types";
+import type { ButtonSetting, Color, MIDIDevice } from "@/stores/types";
 import {
-	colorToVelocity,
+	colorToRGB,
 	coordinateToMidi,
 	midiToCoordinate,
 	sleep,
@@ -44,6 +44,31 @@ const effectTypeBranch = async (
 	}
 };
 
+const sendLedMidiMessage = async (
+	device: MIDIDevice,
+	color: Color,
+	coordinate: { x: number; y: number },
+) => {
+	const midiOutput = device.port as WebMidi.MIDIOutput;
+	const rgb = colorToRGB(color);
+	const note = coordinateToMidi(coordinate.x, coordinate.y);
+	const sendMidiInfo: Uint8Array = new Uint8Array([
+		0xf0,
+		0x00,
+		0x20,
+		0x29,
+		0x02,
+		0x18,
+		0x0b,
+		note, //LED(どのパッドか)
+		rgb.r, //Red(0-3F 0:OFF 3F:MAX )
+		rgb.g, //Green(0-3F 0:OFF 3F:MAX)
+		rgb.b, //Blue(0-3F 0:OFF 3F:MAX)
+		0xf7, //End of SysEx
+	]);
+	midiOutput.send(sendMidiInfo);
+};
+
 const sendMidiMessageDot = async (
 	event: WebMidi.MIDIMessageEvent,
 	device: MIDIDevice,
@@ -55,20 +80,27 @@ const sendMidiMessageDot = async (
 
 	// 消灯
 	if (inputVelocity === 0) {
-		midiOutput.send([inputStatus, inputNote, 0]);
+		sendLedMidiMessage(
+			device,
+			{
+				colorType: "black",
+				lightness: 0,
+			},
+			coordinate,
+		);
 		return;
 	}
 
 	// 点灯
-	const midi = coordinateToMidi(coordinate.x, coordinate.y);
-	midiOutput.send([
-		inputStatus,
-		midi,
-		colorToVelocity({
+	sendLedMidiMessage(
+		device,
+		{
 			colorType: buttonSetting.colorType,
-			lightness: 2,
-		}),
-	]);
+			lightness: 1,
+		},
+		coordinate,
+	);
+
 	return;
 };
 
@@ -84,23 +116,28 @@ const sendMidiMessageHorizontal = async (
 	// 消灯
 	if (inputVelocity === 0) {
 		for (let i = 0; i <= 7; i++) {
-			const midi = coordinateToMidi(i, coordinate.y);
-			midiOutput.send([inputStatus, midi, 0]);
+			sendLedMidiMessage(
+				device,
+				{
+					colorType: "black",
+					lightness: 0,
+				},
+				{ x: i, y: coordinate.y },
+			);
 		}
 		return;
 	}
 
 	// 横一列に点灯
 	for (let i = 0; i <= 7; i++) {
-		const midi = coordinateToMidi(i, coordinate.y);
-		midiOutput.send([
-			inputStatus,
-			midi,
-			colorToVelocity({
+		sendLedMidiMessage(
+			device,
+			{
 				colorType: buttonSetting.colorType,
-				lightness: 2,
-			}),
-		]);
+				lightness: 1,
+			},
+			{ x: i, y: coordinate.y },
+		);
 	}
 	return;
 };
@@ -117,23 +154,28 @@ const sendMidiMessageVertical = async (
 	// 消灯
 	if (inputVelocity === 0) {
 		for (let i = 0; i <= 7; i++) {
-			const midi = coordinateToMidi(coordinate.x, i);
-			midiOutput.send([inputStatus, midi, 0]);
+			sendLedMidiMessage(
+				device,
+				{
+					colorType: "black",
+					lightness: 0,
+				},
+				{ x: coordinate.x, y: i },
+			);
 		}
 		return;
 	}
 
 	// 縦一列に点灯
 	for (let i = 0; i <= 7; i++) {
-		const midi = coordinateToMidi(coordinate.x, i);
-		midiOutput.send([
-			inputStatus,
-			midi,
-			colorToVelocity({
+		sendLedMidiMessage(
+			device,
+			{
 				colorType: buttonSetting.colorType,
-				lightness: 2,
-			}),
-		]);
+				lightness: 1,
+			},
+			{ x: coordinate.x, y: i },
+		);
 	}
 	return;
 };
@@ -144,7 +186,6 @@ const sendMidiMessageExplosion = async (
 	buttonSetting: ButtonSetting,
 	coordinate: { x: number; y: number },
 ) => {
-	const midiOutput = device.port as WebMidi.MIDIOutput;
 	const [inputStatus, inputNote, inputVelocity] = event.data;
 
 	// 離したときはなにもしない
@@ -155,15 +196,14 @@ const sendMidiMessageExplosion = async (
 	// ドットと1集周りが光る
 	for (let i = -1; i <= 1; i++) {
 		for (let j = -1; j <= 1; j++) {
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([
-				inputStatus,
-				midi,
-				colorToVelocity({
+			sendLedMidiMessage(
+				device,
+				{
 					colorType: buttonSetting.colorType,
-					lightness: 3,
-				}),
-			]);
+					lightness: 1,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 	await sleep(50);
@@ -171,8 +211,14 @@ const sendMidiMessageExplosion = async (
 	// ドットと一周が消える
 	for (let i = -1; i <= 1; i++) {
 		for (let j = -1; j <= 1; j++) {
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, 0]);
+			sendLedMidiMessage(
+				device,
+				{
+					colorType: "black",
+					lightness: 0,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 
@@ -182,15 +228,14 @@ const sendMidiMessageExplosion = async (
 			if (2 > Math.abs(i) && 2 > Math.abs(j)) {
 				continue;
 			}
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([
-				inputStatus,
-				midi,
-				colorToVelocity({
+			sendLedMidiMessage(
+				device,
+				{
 					colorType: buttonSetting.colorType,
-					lightness: 2,
-				}),
-			]);
+					lightness: 0.1,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 
@@ -198,8 +243,14 @@ const sendMidiMessageExplosion = async (
 	// ドットのさらに周りが消える
 	for (let i = -2; i <= 2; i++) {
 		for (let j = -2; j <= 2; j++) {
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, 0]);
+			sendLedMidiMessage(
+				device,
+				{
+					colorType: "black",
+					lightness: 0,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 
@@ -209,15 +260,14 @@ const sendMidiMessageExplosion = async (
 			if (3 > Math.abs(i) && 3 > Math.abs(j)) {
 				continue;
 			}
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([
-				inputStatus,
-				midi,
-				colorToVelocity({
+			sendLedMidiMessage(
+				device,
+				{
 					colorType: buttonSetting.colorType,
-					lightness: 1,
-				}),
-			]);
+					lightness: 0.03,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 
@@ -225,8 +275,14 @@ const sendMidiMessageExplosion = async (
 	// ドットのさらに周りが消える
 	for (let i = -3; i <= 3; i++) {
 		for (let j = -3; j <= 3; j++) {
-			const midi = coordinateToMidi(coordinate.x + i, coordinate.y + j);
-			midiOutput.send([inputStatus, midi, 0]);
+			sendLedMidiMessage(
+				device,
+				{
+					colorType: "black",
+					lightness: 0,
+				},
+				{ x: coordinate.x + i, y: coordinate.y + j },
+			);
 		}
 	}
 	return;
