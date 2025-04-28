@@ -45,7 +45,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 					id: input.id,
 					name: input.name || "Unknown Device",
 					type: "input",
-					port: input,
+					port: input as WebMidi.MIDIInput,
 				});
 			});
 
@@ -56,7 +56,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 					id: output.id,
 					name: output.name || "Unknown Device",
 					type: "output",
-					port: output,
+					port: output as WebMidi.MIDIOutput,
 				});
 			});
 
@@ -65,6 +65,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 				const port = event.port;
 				const currentDevices = get().devices;
 
+				if (!port) return;
 				if (port.state === "connected") {
 					if (!currentDevices.some((d) => d.id === port.id)) {
 						set((state) => ({
@@ -74,7 +75,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 									id: port.id,
 									name: port.name || "Unknown Device",
 									type: port.type,
-									port: port,
+									port: port as WebMidi.MIDIInput | WebMidi.MIDIOutput,
 								},
 							],
 						}));
@@ -104,7 +105,7 @@ export const createMIDISlice: StateCreator<RootState, [], [], MIDISlice> = (
 				}
 			};
 
-			set({ midiAccess, devices });
+			set({ midiAccess: midiAccess as WebMidi.MIDIAccess, devices });
 		} catch (error) {
 			console.error("MIDI initialization error:", error);
 			toast.error("MIDIデバイスへのアクセスに失敗しました");
